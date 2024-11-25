@@ -39,7 +39,6 @@ resource "docker_container" "mongo" {
     source      = docker_volume.mongo_data.name
     target      = "/data/db"
     read_only   = false
-    propagation = "rprivate"
   }
 }
 
