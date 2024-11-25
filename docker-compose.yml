@@ -1,14 +1,14 @@
 version: '3.8'
 
-services: 
+services:
   app:
-    image: mixxy3k/node-mongo-app
+    build: .
     ports:
-      - "3000:3000"
+    - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/myapp
     depends_on:
       - mongo
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/test
   mongo:
     image: mongo:5.0
     ports:
