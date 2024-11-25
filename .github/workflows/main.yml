@@ -64,7 +64,7 @@ jobs:
             docker run -d --name mongo \
               -p 27017:27017 \
               mongo:5.0
-
+            sleep 10
             # Uruchomienie nowego kontenera aplikacji
             docker run -d --name app \
               -p 3000:3000 \
