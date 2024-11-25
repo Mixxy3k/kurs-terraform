@@ -27,7 +27,7 @@ jobs:
       - name: Build and push
         run: |
           docker build -t node-mongo-app .
-          docker run -d --name mongo:5.0
+          docker run -d --name mongo mongo:5.0
           docker run -d --name app --link mongo -p 3000:3000 node-mongo-app
           sleep 10
           curl http://localhost:3000 || exit 1
