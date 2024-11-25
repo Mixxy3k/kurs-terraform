@@ -46,15 +46,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Deploy
-        uses: appleboy/ssh-action@v0.1.9
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd ~/node-mongo-app
-            docker-compose down
-            docker pull ${{ secrets.DOCKER_USERNAME }}/node-mongo-app:latest
-            docker-compose up -d
+      # - name: Deploy using Docker Compose
+      #   uses: appleboy/ssh-action@v0.1.9
+      #   with:
+      #     host: ${{ secrets.VPS_HOST }}
+      #     username: ${{ secrets.VPS_USERNAME }}
+      #     key: ${{ secrets.SSH_KEY }}
+      #     port: ${{ secrets.SSH_PORT }}
+      #     script: |
+      #       cd ~/node-mongo-app
+      #       docker-compose down
+      #       docker pull ${{ secrets.DOCKER_USERNAME }}/node-mongo-app:latest
+      #       docker-compose up -d
+        
+        - name: Deploy using Terraform
+          uses: appleboy/ssh-action@v0.1.9
+          with:
+            host: ${{ secrets.VPS_HOST }}
+            username: ${{ secrets.VPS_USERNAME }}
+            key: ${{ secrets.SSH_KEY }}
+            port: ${{ secrets.SSH_PORT }}
+            script: |
+              cd ~/kurs-terraform
+              git pull
+              terraform init
+              terraform plan
+              terraform apply -auto-approve
+              terraform output -json > output.json  
+
+          
+
