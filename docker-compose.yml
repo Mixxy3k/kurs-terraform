@@ -2,7 +2,7 @@ version: '3.8'
 
 services: 
   app:
-    build: .
+    image: mixxy3k/node-mongo-app
     ports:
       - "3000:3000"
     depends_on:
