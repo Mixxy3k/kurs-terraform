@@ -7,31 +7,36 @@ terraform {
   }
 }
 
-# Ustawienie dostawcy Docker
 provider "docker" {}
 
-# Pobranie informacji o istniejącej sieci
-data "docker_network" "existing_network" {
-  name = "app_network"
-}
-
-# Utworzenie sieci dla aplikacji jeśli nie istnieje
+# Network resource (as before)
 resource "docker_network" "app_network" {
-  count = length(data.docker_network.existing_network.id) > 0 ? 0 : 1
-  name  = "app_network"
+  name = "app_network"
+
+  lifecycle {
+    ignore_changes = [name]
+  }
 }
 
-# Wolumin dla MongoDB
+# Volume for MongoDB
 resource "docker_volume" "mongo_data" {
   name = "mongo_data"
+
+  lifecycle {
+    ignore_changes = [name]
+  }
 }
 
-# Pobranie obrazu z DockerHub
+# MongoDB Image
 resource "docker_image" "mongo" {
   name = "mongo:5.0"
+
+  lifecycle {
+    ignore_changes = [name]
+  }
 }
 
-# Tworzenie kontenera dla MongoDB
+# MongoDB Container
 resource "docker_container" "mongo" {
   name  = "mongo"
   image = docker_image.mongo.name
@@ -42,7 +47,7 @@ resource "docker_container" "mongo" {
   }
 
   networks_advanced {
-    name = length(docker_network.app_network) > 0 ? docker_network.app_network[0].name : data.docker_network.existing_network.name
+    name = docker_network.app_network.name
   }
 
   mounts {
@@ -56,21 +61,30 @@ resource "docker_container" "mongo" {
     interval = "10s"
     retries  = 3
   }
+
+  lifecycle {
+    ignore_changes = [name]
+  }
 }
 
-# Tworzenie obrazu Dockera dla Nodejs
+# Node.js App Image
 resource "docker_image" "app_image" {
   name = "node-mongo-app"
+
   build {
     context    = "${path.module}/."
     dockerfile = "Dockerfile"
   }
+
+  lifecycle {
+    ignore_changes = [name]
+  }
 }
 
-# Tworzenie kontenera dla aplikacji Nodejs
+# Node.js App Container
 resource "docker_container" "app" {
-  name   = "app"
-  image  = docker_image.app_image.name
+  name  = "app"
+  image = docker_image.app_image.name
 
   ports {
     internal = 3000
@@ -78,7 +92,7 @@ resource "docker_container" "app" {
   }
 
   networks_advanced {
-    name = length(docker_network.app_network) > 0 ? docker_network.app_network[0].name : data.docker_network.existing_network.name
+    name = docker_network.app_network.name
   }
 
   env = [
@@ -87,4 +101,8 @@ resource "docker_container" "app" {
   ]
 
   depends_on = [docker_container.mongo]
+
+  lifecycle {
+    ignore_changes = [name]
+  }
 }
