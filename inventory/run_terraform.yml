@@ -28,13 +28,3 @@
 - name: Display Terraform apply
   debug:
     msg: "Apply: \n{{ terraform_apply.stdout }}"
-
-- name: Get public IP
-  command: terraform output public_ip
-  args:
-    chdir: /var/www/server
-  register: public_ip
-
-- name: Display public IP
-  debug:
-    msg: "Public IP: {{ public_ip.stdout }}"
