@@ -7,36 +7,37 @@ terraform {
   }
 }
 
+# Ustawienie dostawcy Docker
 provider "docker" {}
 
-# Network resource (as before)
+# Utworzenie sieci dla aplikacji (bez warunku na istnienie)
 resource "docker_network" "app_network" {
   name = "app_network"
 
   lifecycle {
-    ignore_changes = [name]
+    ignore_changes = [name] # Ignore changes if the network already exists
   }
 }
 
-# Volume for MongoDB
+# Wolumin dla MongoDB
 resource "docker_volume" "mongo_data" {
   name = "mongo_data"
 
   lifecycle {
-    ignore_changes = [name]
+    ignore_changes = [name] # Ignore changes if the volume already exists
   }
 }
 
-# MongoDB Image
+# Pobranie obrazu z DockerHub
 resource "docker_image" "mongo" {
   name = "mongo:5.0"
 
   lifecycle {
-    ignore_changes = [name]
+    ignore_changes = [name] # Ignore changes for existing images
   }
 }
 
-# MongoDB Container
+# Tworzenie kontenera dla MongoDB
 resource "docker_container" "mongo" {
   name  = "mongo"
   image = docker_image.mongo.name
@@ -63,28 +64,27 @@ resource "docker_container" "mongo" {
   }
 
   lifecycle {
-    ignore_changes = [name]
+    ignore_changes = [name, ports, networks_advanced, mounts, healthcheck]
   }
 }
 
-# Node.js App Image
+# Tworzenie obrazu Dockera dla Nodejs
 resource "docker_image" "app_image" {
   name = "node-mongo-app"
-
   build {
     context    = "${path.module}/."
     dockerfile = "Dockerfile"
   }
 
   lifecycle {
-    ignore_changes = [name]
+    ignore_changes = [name] # Prevent recreation of the image if it exists
   }
 }
 
-# Node.js App Container
+# Tworzenie kontenera dla aplikacji Nodejs
 resource "docker_container" "app" {
-  name  = "app"
-  image = docker_image.app_image.name
+  name   = "app"
+  image  = docker_image.app_image.name
 
   ports {
     internal = 3000
@@ -103,6 +103,6 @@ resource "docker_container" "app" {
   depends_on = [docker_container.mongo]
 
   lifecycle {
-    ignore_changes = [name]
+    ignore_changes = [name, ports, networks_advanced, env]
   }
 }
