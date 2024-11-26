@@ -37,4 +37,6 @@ app.get("/items", async (req, res) => {
 });
 
 // Start server
-app.listen(port, () => console.log(`App running on http://localhost:${port}`));
+app.listen(port, () =>
+    console.log(`App running on a http://localhost:${port}`)
+);
