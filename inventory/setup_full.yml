@@ -1,0 +1,32 @@
+- name: Setup Node.js and MongoDB on Ubuntu
+  hosts: servers
+  become: yes
+  tasks:
+    # 1. Zainstaluj zależności
+    - name: Install prerequisites
+      apt:
+        name: 
+          - curl
+          - gnupg
+          - build-essential
+          - apt-transport-https
+          - ca-certificates
+          - software-properties-common
+          - unzip
+          - git
+        state: present
+        update_cache: yes
+ 
+    - include_tasks: docker.yml
+
+    - include_tasks: terraform.yml
+
+    # - include_tasks: node.yml
+
+    # - include_tasks: mongo.yml
+ 
+    - include_tasks: clone.yml
+
+    #- include_tasks: run_node.yml
+
+    - include_tasks: run_terraform.yml

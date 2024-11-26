@@ -1,0 +1,22 @@
+- name: Add HashiCorp GPG key
+  apt_key:
+    url: https://apt.releases.hashicorp.com/gpg
+    state: present
+
+- name: Add Terraform repository
+  apt_repository:
+    repo: deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main
+    state: present
+
+- name: Install Terraform
+  apt:
+    name: terraform
+    state: present
+
+- name: Verify Terraform installation
+  command: terraform --version
+  register: terraform_version
+
+- name: Display Terraform version
+  debug:
+    msg: "{{ terraform_version.stdout }}"

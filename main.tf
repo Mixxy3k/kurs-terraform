@@ -25,25 +25,31 @@ resource "docker_image" "mongo" {
 }
 
 # Tworzenie kontenera dla MongoDB 
+# Tworzenie kontenera dla MongoDB
 resource "docker_container" "mongo" {
-    name = "mongo"
+    name  = "mongo"
     image = docker_image.mongo.name
 
     ports {
         internal = 27017 # port w kontenerze
         external = 27017 # port w hoście 
     }
-    # Podłączenie do sieci 
     networks_advanced {
         name = docker_network.app_network.name
     }
-    # Montowanie woluminu MongoDB
     mounts {
         target = "/data/db"
         source = docker_volume.mongo_data.name
-        type = "volume"
+        type   = "volume"
     }
-} 
+
+    healthcheck {
+        test     = ["CMD", "mongo", "--eval", "db.runCommand({ ping: 1 })"]
+        interval = "10s"
+        retries  = 3
+    }
+}
+
 # Tworzenie obrazu Dockera dla Nodejs
 resource "docker_image" "app_image" {
     name = "node-mongo-app"
@@ -53,11 +59,10 @@ resource "docker_image" "app_image" {
     }
 }
 # Tworzenie kontenera dla aplikacji Nodejs
+# Tworzenie kontenera dla aplikacji Nodejs
 resource "docker_container" "app" {
-    name = "app" # Nazwa kontenera
-    # image = docker_image.app_image.name # Wykorzystanie obrazu z DockerHub
-    image = "${var.docker_image}"
-
+    name   = "app" # Nazwa kontenera
+    image  = docker_image.app_image.name # Wykorzystanie obrazu lokalnego
     ports {
         internal = 3000 # port w kontenerze
         external = 3000 # port w hoście 
@@ -65,6 +70,10 @@ resource "docker_container" "app" {
     networks_advanced {
         name = docker_network.app_network.name
     }
+    env = [
+        "MONGO_HOST=mongo",
+        "MONGO_PORT=27017"
+    ]
     # Kontener aplikacji nie uruchomi się przed Mongo
     depends_on = [docker_container.mongo] 
 }

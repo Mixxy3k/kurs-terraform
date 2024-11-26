@@ -1,0 +1,42 @@
+- name: Create application directory
+  file:
+    path: /var/www/server
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Check SSH key
+  file:
+    path: /root/.ssh
+    state: directory
+    mode: 0700
+    owner: root
+    group: root
+
+- name: Display SSH key
+  command: cat /root/.ssh/id_rsa.pub
+  register: ssh_public_key
+
+- name: Show SSH key for Github
+  debug:
+    msg: |
+      Dodaj klucz publiczny do swojego konta w portalu github.com:
+      {{ ssh_public_key.stdout }}
+
+- name: Wait for user
+  pause:
+    prompt: >
+      Dodaj klucz do konta w portalu github.com, jeśli klucz został dodany kliknij ENTER aby kontynuować:
+
+- name: Known hosts
+  shell: ssh-keyscan github.com >> /root/.ssh/known_hosts
+  args:
+    creates: /root/.ssh/known_hosts
+    
+- name: Clone repository
+  git:
+    repo: 'git@github.com:Mixxy3k/kurs-terraform.git'
+    dest: /var/www/server
+    version: main
+    key_file: /root/.ssh/id_rsa

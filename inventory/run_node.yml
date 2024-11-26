@@ -1,0 +1,10 @@
+- name: Install npm dependencies
+  command: npm install
+  args:
+    chdir: /var/www/server
+
+- name: Start Node.js app
+  command: node app.js
+  args:
+    chdir: /var/www/server
+    creates: /tmp/app.lock

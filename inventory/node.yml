@@ -1,0 +1,21 @@
+- name: Remove conflicting packages
+  apt:
+    name:
+      - nodejs
+      - libnode-dev
+    state: absent
+
+- name: Add NodeSource repository for Node.js
+  shell: curl -fsSL https://deb.nodesource.com/setup_23.x -o /tmp/nodesource_setup.sh
+  args:
+    executable: /bin/bash
+
+- name: Install Node.js
+  apt:
+    name: nodejs
+    state: present
+
+- name: Clean up apt cache
+  apt:
+    autoclean: yes
+    autoremove: yes
