@@ -10,10 +10,15 @@ terraform {
 # Ustawienie dostawcy Docker
 provider "docker" {}
 
-# Sieć do komunikacji pomiędzy kontenerami
-resource "docker_network" "app_network" {
-    name = "app_network"
+data "docker_network" "existing_network" {
+  name = "app_network"
 }
+
+resource "docker_network" "app_network" {
+  count = length(data.docker_network.existing_network.id) > 0 ? 0 : 1
+  name  = "app_network"
+}
+
 # Wolumin dla MongoDB
 resource "docker_volume" "mongo_data" {
     name = "mongo_data"
